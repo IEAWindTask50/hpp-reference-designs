@@ -1,0 +1,11 @@
+name: Battery Farm IEA Wind Reference HPP v0.0
+battery_systems:
+  technology: lithium-ion-phosphate prismatic cell - 314Ah
+  energy_capacity: 5015000.0
+  power_capacity: 2500000.0
+  round_trip_efficiency_nominal: 0.937
+  round_trip_efficiency_0.25C: 0.952
+  n_full_load_cycles: 11000
+power_conditioning_unit:
+  efficiency: 0.986
+n_systems: 60

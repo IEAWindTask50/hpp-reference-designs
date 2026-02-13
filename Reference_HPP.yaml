@@ -1,0 +1,18 @@
+name: IEA Referece HPP v0.0
+site:
+  name: Site IEA Wind Reference HPP v0.0
+  boundaries:
+    polygons:
+    - x:
+      - 6362691.97
+      - 6370691.97
+      y:
+      - 1386718.06
+      - 1394718.06
+  energy_resource: !include Energy_Resource.yaml
+  latitude: 56.2
+  longitude: 8.59
+wind_farm: !include Wind_Farm_Reference_HPP.yaml
+solar_pv_farm: !include Solar_PV_Farm_Reference_HPP.yaml
+storage_system: !include Battery_Reference_HPP.yaml
+grid_connection_capacity: 300000000.0
