@@ -1,4 +1,8 @@
-name: Solar PV Farm IEA Wind Reference HPP v0.0
+name: Solar PV Farm IEA Wind Reference HPP v0.1
+site:
+  name: Site IEA Wind Reference HPP v0.1
+  boundaries: undefined
+  energy_resource: !include Solar_Resource_2022.yaml
 pvsystems:
   modules:
     voltage_open_circuit: 53.7

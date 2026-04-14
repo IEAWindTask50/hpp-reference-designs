@@ -1,0 +1,8 @@
+name: "driver_config"
+description: "This analysis runs the analysis of the reference HPP design"
+
+general:
+  folder_output: ./
+
+recorder:
+  flag: False

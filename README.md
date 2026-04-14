@@ -1,4 +1,4 @@
-# IEA Wind Reference Hybrid Power Plant Design (v0.0)
+# IEA Wind Reference Hybrid Power Plant Design (v0.1)
 
 This repository contains the data describing the IEA Wind reference hybrid power plant design (v0.0). The power plant is located in the western part of Denmark and consists of a 325 MW wind farm, 400 MW solar PV farm and a 150 MW / 300 MWh battery storage system, co-located behind a grid connection with capacity of 300 MW.
 

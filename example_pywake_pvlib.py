@@ -27,7 +27,7 @@ plot_figures = True
 # Load the power plant data 
 # ------
 
-file_path = 'hpp-reference-designs/Reference_HPP.yaml'
+file_path = 'Reference_HPP.yaml'
 
 hpp_dat = load_yaml(file_path)
 
@@ -37,20 +37,16 @@ p_max = hpp_dat['grid_connection_capacity']  # Maximum power allowed to be send 
 # Load the wind farm and wind resource data
 # ------
 
-wind_farm_dat = hpp_dat['wind_farm']
-resource_dat = hpp_dat['site']['energy_resource']
-
-# Extract wind resource data (wind rose)
-A = resource_dat['wind_resource']['weibull_a']
-k = resource_dat['wind_resource']['weibull_k']
-freq = resource_dat['wind_resource']['sector_probability']
+wind_farm_dat = hpp_dat['wind_farm']['wind_farm']
+wind_resource_dat = hpp_dat['wind_farm']['site']['energy_resource']
+solar_resource_dat = hpp_dat['solar_pv_farm']['site']['energy_resource']
 
 # Get x and y positions of the wind farm layout
 x = wind_farm_dat['layouts']['coordinates']['x'] 
 y = wind_farm_dat['layouts']['coordinates']['y'] 
 
 # Load turbine data - NREL 5 MW, extracted from report
-wt_dat = wind_farm_dat['turbines'] 
+wt_dat = wind_farm_dat['turbine'] 
 hh = wt_dat['hub_height']
 rd =wt_dat['rotor_diameter']  # rotor diameter
 rp = wt_dat['performance']['rated_power'] # rated power
@@ -58,7 +54,7 @@ rp = wt_dat['performance']['rated_power'] # rated power
 # Recreate power curve from power coefficient curve
 factor = 0.5 * 1.225* np.pi *(rd/2)**2
 p_ws = wt_dat['performance']['Cp_curve']['Cp_wind_speeds']
-p = [cp * factor*u**3 for cp, u in zip(wt_dat['performance']['Cp_curve']['Cp_values'], p_ws)]
+p = [cp * factor*u**3 for cp, u in zip(wt_dat['performance']['Cp_curve']['Cp_values'], p_ws)] #power curve includes generator losses
 
 ct = wt_dat['performance']['Ct_curve']['Ct_values']
 ct_ws = wt_dat['performance']['Ct_curve']['Ct_wind_speeds']
@@ -73,9 +69,9 @@ cts_int = np.interp(int_speeds, ct_ws, ct)
 ps_int[ (int_speeds < cut_in) | (int_speeds > cut_out) ] = 0 # Set power to zero outside of operating range
 
 # Load wind speed and wind direction time series
-ws_time = resource_dat['wind_resource']['wind_speed']
-wd_time = resource_dat['wind_resource']['wind_direction']
-ti = resource_dat['wind_resource']['turbulence_intensity']['data']
+ws_time = wind_resource_dat['wind_resource']['wind_speed']
+wd_time = wind_resource_dat['wind_resource']['wind_direction']
+ti = wind_resource_dat['wind_resource']['turbulence_intensity']['data']
 
 time_stamp = np.arange(len(wd_time))/24 
 
@@ -87,10 +83,6 @@ time_stamp = np.arange(len(wd_time))/24
 # Define turbines, site and wind farm objects in pywake
 windTurbines = WindTurbine(name='NREL 5 MW', diameter=rd, hub_height=hh, 
                       powerCtFunction=PowerCtTabular(int_speeds, ps_int, power_unit='W', ct=cts_int))
-
-# Recreate the wind speed and wind direction vectors corresponding to the wind rose
-wd = np.linspace(0, 360, len(A['data'])+1)[:-1]
-ws = p_ws
 
 # Create the object representing the site and the wind farm model 
 site = XRSite(ds=xr.Dataset(data_vars= dict(P=1)))
@@ -125,15 +117,15 @@ if plot_figures:
 # ------
 
 # Define location
-latitude = hpp_dat['site']['latitude']
-longitude = hpp_dat['site']['longitude']
+latitude = hpp_dat['latitude']
+longitude = hpp_dat['longitude']
 tz = 'Etc/GMT+1'  # Timezone for the location
 
 # Import solar resource data
-time = [ datetime.strptime(x, '%Y-%m-%dT%H:%M:%S+00:00Z')  for x in resource_dat['solar_resource']['time']]
-ghi = resource_dat['solar_resource']['ghi']
-dhi = resource_dat['solar_resource']['dhi']
-dni = resource_dat['solar_resource']['dni']
+time = [ datetime.strptime(x, '%Y-%m-%dT%H:%M:%S%zZ')  for x in solar_resource_dat['solar_resource']['time']]
+ghi = solar_resource_dat['solar_resource']['ghi']
+dhi = solar_resource_dat['solar_resource']['dhi']
+dni = solar_resource_dat['solar_resource']['dni']
 
 # Import pv system and pv module parameters
 pvsystem = hpp_dat['solar_pv_farm']['pvsystems']
@@ -178,7 +170,7 @@ temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_g
 # Run the solar PV farm simulation with pvlib
 # ------
 
-weather = pd.DataFrame(index = time, data={'ghi': ghi, 'dhi': dhi, 'dni': dni})
+weather = pd.DataFrame(index = pd.DatetimeIndex(time, tz = 'Europe/Berlin'), data={'ghi': ghi, 'dhi': dhi, 'dni': dni})
 
 location = Location(latitude, longitude, tz)
 
@@ -189,8 +181,7 @@ system = PVSystem(surface_tilt=tilt, surface_azimuth=surface_azimuth,
                   strings_per_inverter=strings_per_inverter, modules_per_string = modules_per_string)
 
 # Create a model chain object. Models chosen arbitrarily to work with the available data.
-model_chain = ModelChain(system, location, dc_model='pvwatts', aoi_model='no_loss', ac_model='pvwatts')
-
+model_chain = ModelChain.with_pvwatts(system, location)
 # Run the simulation
 model_chain.run_model(weather)
 
@@ -228,3 +219,9 @@ rt_efficiency_ac = rt_efficiency_dc*power_conversion_efficiency**2
 n_battsystems = batt_dat['n_systems']
 p_cap_w = n_battsystems * batt_dat['battery_systems']['power_capacity'] 
 e_cap_w = n_battsystems * batt_dat['battery_systems']['energy_capacity']
+
+#%% save to file
+
+# filename_power = '../power_timeseries.csv'
+# dt = pd.DataFrame({ 'power_wind': power_wind, 'power_solar': power_solar})
+# dt.to_csv(filename_power)

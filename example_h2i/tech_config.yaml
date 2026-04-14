@@ -1,0 +1,121 @@
+name: technology_config
+description: This plant is a simple passthrough wind+solar+battery hybrid energy plant within HOPP
+technologies:
+  wind:
+      performance_model:
+        model: ArdWindPlantModel
+      cost_model:
+        model: ArdWindPlantModel
+      model_inputs:
+        performance_parameters:
+          ard_data_path: ard_folder/
+          ard_system:
+            system: onshore_batch
+            modeling_options:
+              windIO_plant: !include ../Wind_Farm_Reference_HPP.yaml
+              layout:
+                N_turbines: 65
+                N_substations: 1
+                spacing_primary: 7.71
+                spacing_secondary: 6.2
+                angle_orientation: 1.82
+                angle_skew: -1.58
+              aero:
+                return_turbine_output: false
+              floris:
+                peak_shaving_fraction: 0.2
+                peak_shaving_TI_threshold: 0.0
+              collection:
+                max_turbines_per_string: 8
+                solver_name: highs
+                solver_options:
+                  time_limit: 60
+                  mip_gap: 0.02
+                model_options:
+                  topology: branched    # "radial", "branched"
+                  feeder_route: segmented
+                  feeder_limit: unlimited
+              offshore: false
+              floating: false
+              costs:
+                rated_power: 5000000.0  # W
+                num_blades: 3
+                rated_thrust_N: 823484.4216152605  # from NREL 5MW definition
+                gust_velocity_m_per_s: 70.0  # from https://github.com/WISDEM/WISDEM/blob/master/examples/02_reference_turbines/nrel5mw.yaml
+                blade_surface_area: 69.7974979
+                tower_mass: 620.4407337521
+                nacelle_mass: 101.98582836439
+                hub_mass: 8.38407517646
+                blade_mass: 14.56341339641
+                foundation_height: 0.0
+                commissioning_cost_kW: 44.0  # from https://github.com/WISDEM/WISDEM/blob/master/examples/02_reference_turbines/nrel5mw.yaml
+                decommissioning_cost_kW: 58.0  # from https://github.com/WISDEM/WISDEM/blob/master/examples/02_reference_turbines/nrel5mw.yaml
+                trench_len_to_substation_km: 50.0
+                distance_to_interconnect_mi: 4.97096954
+                interconnect_voltage_kV: 130.0  # from https://github.com/WISDEM/WISDEM/blob/master/examples/02_reference_turbines/nrel5mw.yaml
+                tcc_per_kW: 1300.00  # (USD/kW)
+                opex_per_kW: 44.00  # (USD/kWh)
+            analysis_options: null
+        cost_parameters:
+          cost_year: 2024   
+  solar:
+    performance_model:
+      model: PYSAMSolarPlantPerformanceModel
+    cost_model:
+      model: ATBUtilityPVCostModel
+    model_inputs:
+      performance_parameters:
+        pv_capacity_kWdc: 400000  # 400 MW
+        dc_ac_ratio: 1.0
+        create_model_from: new
+        tilt_angle_func: none
+        tilt: 25
+        pysam_options:
+          SystemDesign:
+            gcr: 0.3
+            array_type: 0  # fixed, non-tracking
+            bifaciality: 0.65
+            inv_eff: 96.0
+            losses: 14.6
+            module_type: 1
+            azimuth: 180
+            rotlim: 45
+          SolarResource:
+            albedo_default: 0.2
+      cost_parameters:
+        capex_per_kWac: 1193
+        opex_per_kWac_per_year: 18
+        cost_year: 2024
+  combiner:
+    performance_model:
+      model: GenericCombinerPerformanceModel
+    model_inputs:
+      performance_parameters:
+        commodity: electricity
+        commodity_rate_units: kW
+  battery:
+    performance_model:
+      model: SimpleGenericStorage
+    cost_model:
+      model: ATBBatteryCostModel
+    control_strategy:
+      model: DemandOpenLoopStorageController
+    model_inputs:
+      shared_parameters:
+        commodity: electricity
+        commodity_rate_units: kW
+        max_charge_rate: 150000.0  # kW/time step
+        max_capacity: 300000.0  # kWh
+      control_parameters:
+        max_charge_fraction: 1.0  # fraction (0-1)
+        min_charge_fraction: 0.1  # fraction (0-1)
+        init_charge_fraction: 0.25  # fraction (0-1)
+        max_discharge_rate: 150000.0  # kW/time step
+        charge_efficiency: 0.985  # fraction (0-1)
+        discharge_efficiency: 0.985  # fraction (0-1)
+        demand_profile: 30000
+      cost_parameters:
+        cost_year: 2022
+        energy_capex: 72.54  # $/kWh
+        power_capex: 18.72  # $/kW
+        opex_fraction: 0.02  # percent of capex
