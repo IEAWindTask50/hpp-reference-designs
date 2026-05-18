@@ -1,5 +1,5 @@
 name: IEA Reference HPP v0.1
-latitude: 56.2
+latitude: 56.22
 longitude: 8.59
 wind_farm: !include Wind_Farm_Reference_HPP.yaml
 solar_pv_farm: !include Solar_PV_Farm_Reference_HPP.yaml

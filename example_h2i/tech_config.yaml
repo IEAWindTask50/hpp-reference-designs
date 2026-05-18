@@ -16,10 +16,10 @@ technologies:
               layout:
                 N_turbines: 65
                 N_substations: 1
-                spacing_primary: 7.71
-                spacing_secondary: 6.2
-                angle_orientation: 1.82
-                angle_skew: -1.58
+                spacing_primary: 7.74
+                spacing_secondary: 6.27
+                angle_orientation: 2.66
+                angle_skew: -2.66
               aero:
                 return_turbine_output: false
               floris:
@@ -95,7 +95,7 @@ technologies:
         commodity_rate_units: kW
   battery:
     performance_model:
-      model: SimpleGenericStorage
+      model: StoragePerformanceModel
     cost_model:
       model: ATBBatteryCostModel
     control_strategy:
@@ -106,10 +106,9 @@ technologies:
         commodity_rate_units: kW
         max_charge_rate: 150000.0  # kW/time step
         max_capacity: 300000.0  # kWh
-      control_parameters:
-        max_charge_fraction: 1.0  # fraction (0-1)
-        min_charge_fraction: 0.1  # fraction (0-1)
-        init_charge_fraction: 0.25  # fraction (0-1)
+        max_soc_fraction: 1.0  # fraction (0-1)
+        min_soc_fraction: 0.1  # fraction (0-1)
+        init_soc_fraction: 0.25  # fraction (0-1)
         max_discharge_rate: 150000.0  # kW/time step
         charge_efficiency: 0.985  # fraction (0-1)
         discharge_efficiency: 0.985  # fraction (0-1)

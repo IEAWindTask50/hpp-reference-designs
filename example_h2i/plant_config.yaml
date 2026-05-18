@@ -2,14 +2,14 @@ name: plant_config
 description: IEA Reference HPP v0.1 - H2I example file
 sites:
   site:
-    latitude: 56.2
-    longitude: 8.59
+    latitude: 56.22732285
+    longitude: 8.594398
     resources:
       solar_resource:
         resource_model: OpenMeteoHistoricalSolarResource
         resource_parameters:
           resource_year: 2022
-          resource_filename: 56.2_8.59_2022_openmeteo_archive_solar_60min_utc_tz.csv
+          resource_filename: 56.22732285_8.594398_2022_openmeteo_archive_solar_60min_utc_tz.csv
 plant:
   plant_life: 30
 technology_interconnections:
